@@ -1,0 +1,23 @@
+name: Build
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6.0.1
+
+      - name: Set up Go
+        uses: ./.github/actions/setup-go
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Build
+        run: make build
