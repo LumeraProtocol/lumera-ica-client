@@ -4,7 +4,8 @@ go 1.25.5
 
 replace (
 	// for local development
-	github.com/LumeraProtocol/sdk-go => ../sdk-go
+	//github.com/LumeraProtocol/sdk-go => ../sdk-go
+	github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.50.14
 	github.com/envoyproxy/protoc-gen-validate => github.com/bufbuild/protoc-gen-validate v1.3.0
 	github.com/lyft/protoc-gen-validate => github.com/envoyproxy/protoc-gen-validate v1.3.0
 	nhooyr.io/websocket => github.com/coder/websocket v1.8.7
@@ -14,7 +15,7 @@ require (
 	cosmossdk.io/math v1.5.3
 	github.com/BurntSushi/toml v1.4.1-0.20240526193622-a339e1f7089c
 	github.com/LumeraProtocol/lumera v1.9.1
-	github.com/LumeraProtocol/sdk-go v1.0.5
+	github.com/LumeraProtocol/sdk-go v1.0.6
 	github.com/cosmos/cosmos-sdk v0.53.0
 	github.com/spf13/cobra v1.10.1
 )
