@@ -14,6 +14,10 @@ log_level = "info"
 # Key name in the controller keyring to use for Lumera signing.
 key_name = "lumera"
 
+# Key type for the Lumera (host) chain key: "cosmos" (secp256k1) or "evm" (eth_secp256k1).
+# Default: "cosmos"
+#key_type = "cosmos"
+
 [controller]
 # Chain ID of the controller network
 chain_id = "osmo-test-5"
@@ -27,6 +31,9 @@ home = "~/.osmosisd-testnet"
 gas_prices = "0.03uosmo"
 
 key_name = "osmosis-ibc-test"
+# Key type for the controller chain key: "cosmos" (secp256k1) or "evm" (eth_secp256k1).
+# Default: "cosmos"
+#key_type = "cosmos"
 # This keyring is used for ICA signing and cascade metadata (no separate Lumera keyring).
 # KeyRing backend for storing keys: "file", "test", or "os" (default: test)
 keyring_backend = "test"

@@ -63,6 +63,7 @@ func NewICAController(ctx context.Context, cfg *Config, kr keyring.Keyring) (*Co
 		Host:                     hostCfg,
 		Keyring:                  kr,
 		KeyName:                  cfg.Controller.KeyName,
+		HostKeyName:              cfg.Lumera.KeyName,
 		ConnectionID:             cfg.Controller.ConnectionID,
 		CounterpartyConnectionID: cfg.Controller.CounterpartyConnectionID,
 	})

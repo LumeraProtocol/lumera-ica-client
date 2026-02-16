@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	sdkcrypto "github.com/LumeraProtocol/sdk-go/pkg/crypto"
+
 	"github.com/BurntSushi/toml"
 )
 
@@ -25,6 +27,7 @@ type LumeraConfig struct {
 	RPCEndpoint  string `toml:"rpc_endpoint"`
 	LogLevel     string `toml:"log_level"`
 	KeyName      string `toml:"key_name"`
+	KeyType      string `toml:"key_type"`
 }
 
 // ControllerConfig stores controller chain and keyring settings.
@@ -36,6 +39,7 @@ type ControllerConfig struct {
 	Binary                   string `toml:"binary"`
 	Home                     string `toml:"home"`
 	KeyName                  string `toml:"key_name"`
+	KeyType                  string `toml:"key_type"`
 	KeyringBackend           string `toml:"keyring_backend"`
 	KeyringDir               string `toml:"keyring_dir"`
 	KeyringPassphrasePlain   string `toml:"keyring_passphrase_plain"`
@@ -88,6 +92,16 @@ func (c *Config) Validate() error {
 		return err
 	}
 	c.Lumera.LogLevel = logLevel
+	lumeraKeyType, err := normalizeKeyType(c.Lumera.KeyType)
+	if err != nil {
+		return fmt.Errorf("lumera.%w", err)
+	}
+	c.Lumera.KeyType = lumeraKeyType
+	controllerKeyType, err := normalizeKeyType(c.Controller.KeyType)
+	if err != nil {
+		return fmt.Errorf("controller.%w", err)
+	}
+	c.Controller.KeyType = controllerKeyType
 	if strings.TrimSpace(c.Lumera.ChainID) == "" {
 		return fmt.Errorf("lumera.chain_id is required")
 	}
@@ -145,6 +159,29 @@ func (c *Config) Validate() error {
 		}
 	}
 	return nil
+}
+
+// ParseKeyType converts a config string to sdkcrypto.KeyType.
+// It defaults to KeyTypeCosmos when the value is empty.
+func ParseKeyType(value string) (sdkcrypto.KeyType, error) {
+	val := strings.ToLower(strings.TrimSpace(value))
+	switch val {
+	case "", "cosmos":
+		return sdkcrypto.KeyTypeCosmos, nil
+	case "evm":
+		return sdkcrypto.KeyTypeEVM, nil
+	default:
+		return 0, fmt.Errorf("key_type must be one of: cosmos, evm (got %q)", value)
+	}
+}
+
+// normalizeKeyType normalizes a key_type value in place.
+func normalizeKeyType(value string) (string, error) {
+	kt, err := ParseKeyType(value)
+	if err != nil {
+		return "", err
+	}
+	return kt.String(), nil
 }
 
 // normalizeLogLevel maps user input to supported log levels.
