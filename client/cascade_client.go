@@ -35,6 +35,13 @@ func NewCascadeClient(ctx context.Context, cfg *Config) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Validate that keys in the keyring match the configured key types.
+	if err := validateKeyType(controllerKR, cfg.Controller.KeyName, cfg.Controller.KeyType); err != nil {
+		return nil, fmt.Errorf("controller key type: %w", err)
+	}
+	if err := validateKeyType(controllerKR, cfg.Lumera.KeyName, cfg.Lumera.KeyType); err != nil {
+		return nil, fmt.Errorf("lumera key type: %w", err)
+	}
 	// Resolve controller owner address using the configured controller account HRP.
 	ownerAddr, err := sdkcrypto.AddressFromKey(controllerKR, cfg.Controller.KeyName, cfg.Controller.AccountHRP)
 	if err != nil {
@@ -60,6 +67,29 @@ func NewCascadeClient(ctx context.Context, cfg *Config) (*Client, error) {
 		return nil, err
 	}
 	return &Client{Cascade: casc, Keyring: controllerKR, OwnerAddress: ownerAddr}, nil
+}
+
+// validateKeyType checks that a key in the keyring uses the algorithm matching
+// the configured key_type. This catches misconfigurations early — e.g. when a
+// config says key_type = "evm" but the keyring holds a cosmos secp256k1 key.
+func validateKeyType(kr keyring.Keyring, keyName, configuredType string) error {
+	kt, err := ParseKeyType(configuredType)
+	if err != nil {
+		return err
+	}
+	rec, err := kr.Key(keyName)
+	if err != nil {
+		return fmt.Errorf("key %q not found in keyring: %w", keyName, err)
+	}
+	pub, err := rec.GetPubKey()
+	if err != nil {
+		return fmt.Errorf("get pubkey for %q: %w", keyName, err)
+	}
+	expected := string(kt.SigningAlgo().Name())
+	if actual := pub.Type(); actual != expected {
+		return fmt.Errorf("key %q type mismatch: config expects %s but keyring has %s", keyName, expected, actual)
+	}
+	return nil
 }
 
 // newControllerKeyring constructs the Cosmos keyring for the controller chain.
